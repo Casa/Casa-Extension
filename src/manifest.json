@@ -1,0 +1,25 @@
+{
+  "name": "Casa Extension",
+  "description": "Easily make & receive Bitcoin and Lightning Network payments on the web using your Casa Node.",
+  "version": "1.0.2",
+  "manifest_version": 2,
+  "icons": {
+    "48": "icons/icon_48.png",
+    "128": "icons/icon_128.png"
+  },
+  "browser_action": {
+    "default_title": "Casa Extension",
+    "default_popup": "popup/popup.html"
+  },
+  "background": {
+    "scripts": ["background.js"],
+    "persistent": true
+  },
+  "options_ui": {
+    "page": "options/options.html",
+    "open_in_tab": true,
+    "chrome_style": true
+  },
+  "permissions": ["https://min-api.cryptocompare.com/*", "storage", "clipboardWrite", "activeTab", "contextMenus"],
+  "optional_permissions": ["notifications", "http://*/", "https://*/"]
+}

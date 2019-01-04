@@ -1,0 +1,27 @@
+// Set brand colors
+$primary: #5839f5;
+$success: #2fb4b5;
+$info: #ff7200;
+$warning: #ff7200;
+$danger: #f0649e;
+$light-background: #f5f5f5;
+$dark-background: #0a0525;
+
+// Override button colors
+$btn-info-color: darken($info, 45);
+
+// Override alert background colors
+$state-success-bg: lighten($success, 30);
+$state-info-bg: lighten($info, 30);
+$state-warning-bg: lighten($warning, 30);
+$state-danger-bg: lighten($danger, 45);
+
+// Override alert text colors
+$state-success-text: darken($success, 30);
+$state-info-text: darken($info, 30);
+$state-warning-text: darken($warning, 30);
+$state-danger-text: darken($danger, 10);
+
+// Set global options
+$enable-shadows: false;
+$enable-gradients: true;
