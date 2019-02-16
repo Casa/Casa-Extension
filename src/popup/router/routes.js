@@ -1,10 +1,11 @@
+import Landing from './pages/Intro/Landing';
+import Connect from './pages/Intro/Connect';
+import Setup from './pages/Intro/Setup';
+import Auth from './pages/Intro/Auth';
+
 import Login from './pages/Login';
 import Unlock from './pages/Unlock';
 import Settings from './pages/Settings';
-
-import Connect from './pages/Intro/Connect';
-import Landing from './pages/Intro/Landing';
-import Auth from './pages/Intro/Auth';
 
 import Bitcoin from './pages/Bitcoin/Bitcoin';
 import BitcoinSend from './pages/Bitcoin/BitcoinSend';
@@ -22,6 +23,9 @@ import OpenChannel from './pages/Lightning/OpenChannel';
 import PaymentSent from './pages/Lightning/Overlays/PaymentSent';
 import PaymentRequest from './pages/Lightning/Overlays/PaymentRequest';
 import LightningReceipt from './pages/Lightning/Overlays/LightningReceipt';
+
+import LNPopupReview from './pages/Lightning/Popups/LightningReview';
+import LNPopupSuccess from './pages/Lightning/Popups/PaymentSent';
 
 import store from '../../store';
 
@@ -49,6 +53,12 @@ export default [
     name: `connect`,
     component: Connect,
     meta: { requiresAuth: false, transitionName: `slide`, layout: 'home' },
+  },
+  {
+    path: `/setup`,
+    name: `setup`,
+    component: Setup,
+    meta: { requiresAuth: false, transitionName: `slide`, layout: 'intro' },
   },
   {
     path: `/settings`,
@@ -173,6 +183,18 @@ export default [
     path: `/bitcoin/deposit`,
     name: `bitcoinDeposit`,
     component: BitcoinDeposit,
+    meta: { requiresAuth: true, transitionName: `slide`, layout: 'nested' },
+  },
+  {
+    path: `/popup/pay/review`,
+    name: `LNReviewPopup`,
+    component: LNPopupReview,
+    meta: { requiresAuth: true, transitionName: `slide`, layout: 'nested' },
+  },
+  {
+    path: `/popup/pay/success`,
+    name: `LNSuccessPopup`,
+    component: LNPopupSuccess,
     meta: { requiresAuth: true, transitionName: `slide`, layout: 'nested' },
   },
 ];

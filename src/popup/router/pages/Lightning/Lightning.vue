@@ -14,9 +14,9 @@
           <span @click="missingCode" v-clipboard:copy="connectionCode" v-clipboard:success="onCopy" v-clipboard:error="onError">Copy Connection Code</span>
         </b-dropdown-item>
         <b-dropdown-divider></b-dropdown-divider>
-        <b-dropdown-item to="/settings">Connection Settings</b-dropdown-item>
-        <b-dropdown-divider></b-dropdown-divider>
         <b-dropdown-item to="/lightning/channels/new">Open Channel</b-dropdown-item>
+        <b-dropdown-divider></b-dropdown-divider>
+        <b-dropdown-item to="/settings">Settings</b-dropdown-item>
       </b-dropdown>
     </div>
     <!-- Balance -->
@@ -25,7 +25,10 @@
         <rect x="128.44" y="13.61" rx="5" ry="5" width="77.42" height="35.5" /> <rect x="217.44" y="17.61" rx="5" ry="5" width="50.78" height="30.9" />
       </content-loader>
       <h1 v-else>
-        <span>{{ chBalance | btc }} <span class="small-text btc-heartbeat">BTC</span></span>
+        <span
+          ><span class="numeric">{{ chBalance | units }}</span
+          ><units-badge
+        /></span>
       </h1>
       <span class="balance-info">In Lightning Channels</span> <br /><br />
       <img src="~assets/images/qr-code.svg" style="display:none;" /> <img src="~assets/images/send.svg" style="display:none;" />
@@ -36,7 +39,9 @@
     <div class="transaction-list-wrap">
       <!-- Pending Transactions -->
       <div class="tx-list" v-if="pendingTxs.length">
-        <h3>Pending <button-link to="/">View All</button-link></h3>
+        <h3>
+          Pending <a class="btn ext-link" :href="baseUrl" target="_blank" rel="noopener"><strong>View All</strong> <img src="~assets/images/chevron.svg"/></a>
+        </h3>
         <ul class="pending-tx">
           <li class="tx-item" v-for="(tx, index) in pendingTxs" :key="index">
             <div class="tx-row">
@@ -52,7 +57,7 @@
               </div>
               <div class="tx-col-3">
                 <h2>
-                  <span>{{ tx.value | btc }}</span> BTC
+                  <span>{{ tx.value | units }}</span> <span v-if="units === 'btc'">BTC</span><span v-else>sats</span>
                 </h2>
                 <h3>${{ ((parseInt(tx.value) / 100000000) * rate).toFixed(2) }}</h3>
               </div>
@@ -91,7 +96,7 @@
               </div>
               <div class="tx-col-3">
                 <h2>
-                  <span>{{ tx.value | btc }}</span> BTC
+                  <span>{{ tx.value | units }}</span> <span v-if="units === 'btc'">BTC</span><span v-else>sats</span>
                 </h2>
                 <h3>${{ ((parseInt(tx.value) / 100000000) * rate).toFixed(2) }}</h3>
               </div>
@@ -118,6 +123,7 @@ export default {
     return {
       rate: 0,
       alias: '',
+      units: '',
       baseUrl: '',
       chBalance: '',
       isUnlocked: '',
@@ -133,6 +139,7 @@ export default {
   async created() {
     // Get lightning channel settings
     this.baseUrl = this.$store.state.settings.baseUrl;
+    this.units = this.$store.state.settings.units;
     // Check LND Status
     try {
       const status = (await this.$http.get(`${this.baseUrl}:3002/v1/lnd/info/status`)).data;
@@ -201,7 +208,7 @@ export default {
       } catch (err) {
         this.$notify({ group: 'alerts', type: 'error', title: 'Error', text: `There was a problem receiving exchange data.`, position: 'top center' });
       }
-    } else {
+    } else if (this.isUnlocked === false) {
       // LND needs to be unlocked
       this.$router.push('/unlock');
     }

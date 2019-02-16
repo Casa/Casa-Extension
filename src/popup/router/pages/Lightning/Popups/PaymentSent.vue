@@ -4,34 +4,37 @@
       <div class="overlay-message">
         <img src="~assets/images/check-success.svg" alt="success" />
         <h4 class="text-center">Lightning Payment Sent</h4>
-        <h2 class="text-center">{{ this.amount | units }} <span class="heartbeat">BTC</span></h2>
+        <h2 class="text-center">{{ this.amount | units }} <units-badge /></h2>
       </div>
-      <div class="overlay-buttons">
-        <a class="btn casa-button btn-outline btn-block" name="button" @click.prevent="$router.push('/lightning/channels/new')">Open Channel</a>
-        <a class="btn casa-button btn-white btn-block" name="button" href="#" aria-label="close" @click.prevent="$router.push('/lightning')">Done</a>
-      </div>
+      <div class="overlay-buttons"><a class="btn casa-button btn-white btn-block" name="button" href="#" @click="closeWindow">Done</a></div>
     </div>
   </div>
 </template>
 
 <script>
 export default {
-  name: `LightningPaymentSent`,
+  name: `PopupLightningPaymentSent`,
   data() {
     return {
       amount: '',
+      invoice: '',
     };
   },
   async created() {
     const baseUrl = this.$store.state.settings.baseUrl;
-    const invoice = this.$store.state.invoice;
+    this.invoice = localStorage.getItem('invoice');
 
     try {
-      const paymentInfo = (await this.$http.get(`${baseUrl}:3002/v1/lnd/lightning/invoice?paymentRequest=${invoice}`)).data;
+      const paymentInfo = (await this.$http.get(`${baseUrl}:3002/v1/lnd/lightning/invoice?paymentRequest=${this.invoice}`)).data;
       this.amount = paymentInfo.numSatoshis;
     } catch (err) {
       this.$notify({ group: 'alerts', type: 'error', title: 'Error', text: `${err.response.data}`, position: 'top center' });
     }
+  },
+  methods: {
+    closeWindow() {
+      window.close();
+    },
   },
 };
 </script>
@@ -105,5 +108,9 @@ a.btn.casa-button.btn-outline.btn-block {
 
 .heartbeat {
   font-size: 16px;
+}
+
+.btc-heartbeat:before {
+  background-color: #fff !important;
 }
 </style>

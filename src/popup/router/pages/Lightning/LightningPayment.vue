@@ -1,17 +1,23 @@
 <template>
   <div>
-    <section class="data-group">
-      <h3>Send Lightning Payment</h3>
-      <b-form-group label="Enter Payment Code"> <b-form-textarea :rows="3" v-model="invoice"></b-form-textarea> </b-form-group>
-      <a class="btn casa-button btn-block" name="button" @click="submitPayment">Review Payment</a>
-    </section>
-    <section class="wallet-options">
-      <p class="payment-info">{{ maxPaymentOut | btc }}<span class="btc-heartbeat"> BTC</span></p>
-      <p class="payment-details">MAX OUTGOING PAYMENT</p>
-      <button-link to="/bitcoin/deposit">Add Funds</button-link>
-      <button-link to="/lightning/channels/new">Create New Channel</button-link>
-      <a class="btn ext-link" :href="baseUrl" target="_blank" rel="noopener"> <strong>View Existing Channels</strong> <img src="~assets/images/chevron.svg" /> </a>
-    </section>
+    <b-navbar>
+      <img id="back-button" src="~assets/images/back.svg" class="d-inline-block align-top" alt="back" @click.prevent="$router.back()" />
+      <h3 class="page-header">Send Lightning Payment</h3>
+      <img id="forward-button" src="~assets/images/back.svg" />
+    </b-navbar>
+    <main class="popup-main">
+      <section class="data-group">
+        <b-form-group label="Enter Payment Code"> <b-form-textarea :rows="3" v-model="invoice"></b-form-textarea> </b-form-group>
+        <a class="btn casa-button btn-block" name="button" @click="submitPayment">Review Payment</a>
+      </section>
+      <section class="wallet-options">
+        <p class="payment-info">{{ maxPaymentOut | units }}<units-badge /></p>
+        <p class="payment-details">MAX OUTGOING PAYMENT</p>
+        <button-link to="/bitcoin/deposit">Add Funds</button-link>
+        <button-link to="/lightning/channels/new">Create New Channel</button-link>
+        <a class="btn ext-link" :href="baseUrl" target="_blank" rel="noopener"> <strong>View Existing Channels</strong> <img src="~assets/images/chevron.svg" /> </a>
+      </section>
+    </main>
   </div>
 </template>
 
@@ -24,11 +30,13 @@ export default {
     return {
       baseUrl: '',
       invoice: '',
+      units: '',
       maxPaymentIn: '',
       maxPaymentOut: '',
     };
   },
   async created() {
+    this.units = this.$store.state.settings.units;
     this.baseUrl = this.$store.state.settings.baseUrl;
     try {
       const lightning = await this.$http.get(`${this.baseUrl}:3002/v1/pages/lnd`);
@@ -60,6 +68,24 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.navbar {
+  background-color: #160c46;
+}
+
+.popup-main {
+  color: #fff !important;
+  background-color: #160c46;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.page-header {
+  font-size: 20px;
+  font-weight: bold;
+  color: #fff;
+  margin-top: 0.75rem;
+}
+
 .ext-link {
   padding-top: 0.33em;
   padding-bottom: 0.33em;
@@ -75,7 +101,7 @@ export default {
 .wallet-options {
   background-color: #0a0525;
   padding: 1rem 1.5rem 2rem;
-  margin-top: 1rem;
+  margin-top: 2rem;
 }
 
 .wallet-options > a.ext-link > img {
@@ -135,5 +161,13 @@ export default {
 .btn-white {
   background: #fff;
   color: #000 !important;
+}
+
+#back-button {
+  cursor: pointer;
+}
+
+#forward-button {
+  visibility: hidden;
 }
 </style>

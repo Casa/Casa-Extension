@@ -14,6 +14,7 @@ export default new Vuex.Store({
     settings: {
       baseUrl: '',
       intro: '',
+      units: 'btc',
       status: '',
       token: localStorage.getItem('token') || '',
     },

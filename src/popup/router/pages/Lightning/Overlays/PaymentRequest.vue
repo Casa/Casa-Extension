@@ -1,20 +1,26 @@
 <template>
   <div class="overlay">
-    <div class="overlay_inner">
-      <h4>Lightning Request Generated</h4>
-      <p class="details">You’ll need to send this code to the person you’re looking to receive a payment from.</p>
-      <section class="copy-request">
-        <p>{{ paymentRequest }}</p>
-        <a type="button" class="btn casa-button" v-clipboard:copy="paymentRequest" v-clipboard:success="onCopy" v-clipboard:error="onError">
-          <span v-if="!copied">Copy</span> <span v-else><img src="~assets/images/btn-check.svg" alt="check" /> Copied</span>
-        </a>
-      </section>
-      <section class="qr-code">
-        <br />
-        <qr-code :text="paymentRequest" :size="150" error-level="L"></qr-code>
-      </section>
-      <a class="btn casa-button btn-block" href="#" aria-label="close" @click.prevent="$router.push('/lightning')">Done</a>
-    </div>
+    <b-navbar>
+      <img id="back-button" src="~assets/images/back.svg" class="d-inline-block align-top" alt="back" @click.prevent="$router.back()" />
+      <h3 class="page-header">Lightning Request Generated</h3>
+      <img id="forward-button" src="~assets/images/back.svg" />
+    </b-navbar>
+    <main class="popup-main">
+      <div class="overlay_inner">
+        <p class="details">You’ll need to send this code to the person you’re looking to receive a payment from.</p>
+        <section class="copy-request">
+          <p>{{ paymentRequest }}</p>
+          <a type="button" class="btn casa-button" v-clipboard:copy="paymentRequest" v-clipboard:success="onCopy" v-clipboard:error="onError">
+            <span v-if="!copied">Copy</span> <span v-else><img src="~assets/images/btn-check.svg" alt="check" /> Copied</span>
+          </a>
+        </section>
+        <section class="qr-code">
+          <br />
+          <qr-code :text="paymentRequest" :size="150" error-level="L"></qr-code>
+        </section>
+        <a class="btn casa-button btn-block" href="#" aria-label="close" @click.prevent="$router.push('/lightning')">Done</a>
+      </div>
+    </main>
   </div>
 </template>
 
@@ -41,7 +47,6 @@ export default {
       },
       set(value) {
         this.$store.dispatch('setPaymentRequest', value);
-        // this.$router.push({ path: '/lightning' });
       },
     },
   },
@@ -49,6 +54,24 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.navbar {
+  background-color: #160c46;
+}
+
+.popup-main {
+  color: #fff !important;
+  background-color: #160c46;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.page-header {
+  font-size: 20px;
+  font-weight: bold;
+  color: #fff;
+  margin-top: 0.75rem;
+}
+
 .details {
   font-size: 17px;
   font-weight: 500;
@@ -102,7 +125,7 @@ export default {
     max-width: 42em;
     margin-right: auto;
     margin-left: auto;
-    padding: 1em;
+    padding: 0 1em 1em;
   }
 
   &_close {
@@ -133,5 +156,18 @@ export default {
   border: none;
   color: #fff;
   min-width: 105px;
+}
+
+.casa-button.btn-block {
+  margin-top: 1rem;
+  padding: 1rem;
+}
+
+#back-button {
+  cursor: pointer;
+}
+
+#forward-button {
+  visibility: hidden;
 }
 </style>

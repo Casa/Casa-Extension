@@ -13,14 +13,14 @@
       <!-- Amount -->
       <div class="d-flex flex-row justify-content-between align-items-baseline">
         <div class="receipt-label">Sending</div>
-        <div class="receipt-value">{{ transaction.amt }}<span class="btc-heartbeat">BTC</span></div>
+        <div class="receipt-value">{{ transaction.amt | units }} <units-badge /></div>
       </div>
       <div class="d-flex flex-row justify-content-end"><div class="receipt-value">$13.26</div></div>
       <!-- Add Tx Fee Field -->
       <!-- New Balance -->
       <div class="d-flex flex-row justify-content-between align-items-baseline">
         <div class="receipt-label">New BTC Balance</div>
-        <div class="receipt-value">{{ remainingBalance | btc }}<span class="btc-heartbeat">BTC</span></div>
+        <div class="receipt-value">{{ remainingBalance | units }} <units-badge /></div>
       </div>
       <div class="d-flex flex-row justify-content-end">
         <div class="receipt-value">${{ ((parseInt(remainingBalance) / 100000000) * rate).toFixed(3) }}</div>
@@ -35,10 +35,12 @@ export default {
   data() {
     return {
       rate: '',
+      units: '',
       remainingBalance: '',
     };
   },
   async created() {
+    this.units = this.$store.state.settings.units;
     const baseUrl = this.$store.state.settings.baseUrl;
 
     // Get BTC Balance

@@ -1,4 +1,5 @@
 export const SET_BASE_URL = 'SET_BASE_URL';
+export const SET_UNITS = 'SET_UNITS';
 export const SET_INVOICE = 'SET_INVOICE';
 export const SET_PAYMENT_REQUEST = 'SET_PAYMENT_REQUEST';
 export const SET_SEND_COINS_REQUEST = 'SET_SEND_COINS_REQUEST';

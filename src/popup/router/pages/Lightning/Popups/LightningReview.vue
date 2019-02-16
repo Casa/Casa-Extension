@@ -1,7 +1,7 @@
 <template>
   <div>
     <b-navbar>
-      <img id="back-button" src="~assets/images/back.svg" class="d-inline-block align-top" alt="back" @click.prevent="$router.back()" />
+      <img id="back-button" src="~assets/images/back.svg" />
       <h3 class="page-header">Review Lightning Payment</h3>
       <img id="forward-button" src="~assets/images/back.svg" />
     </b-navbar>
@@ -30,7 +30,7 @@
 import axios from 'axios';
 
 export default {
-  name: `LightningReview`,
+  name: `PopupLightningReview`,
   data() {
     return {
       units: '',
@@ -41,6 +41,7 @@ export default {
       description: '',
       chBalance: '',
       pending: false,
+      invoice: '',
     };
   },
   async created() {
@@ -53,9 +54,9 @@ export default {
       this.$notify({ group: 'alerts', type: 'error', title: 'Error', text: `${err.response.data}`, position: 'top center' });
     }
 
-    const invoice = this.$store.state.invoice;
+    this.invoice = localStorage.getItem('invoice');
     try {
-      const paymentInfo = (await this.$http.get(`${baseUrl}:3002/v1/lnd/lightning/invoice?paymentRequest=${invoice}`)).data;
+      const paymentInfo = (await this.$http.get(`${baseUrl}:3002/v1/lnd/lightning/invoice?paymentRequest=${this.invoice}`)).data;
       this.expiry = paymentInfo.expiry;
       this.amount = paymentInfo.numSatoshis;
       this.destination = paymentInfo.destination;
@@ -76,8 +77,8 @@ export default {
       const baseUrl = this.$store.state.settings.baseUrl;
       this.pending = true;
       try {
-        await this.$http.post(`${baseUrl}:3002/v1/lnd/lightning/payInvoice`, { paymentRequest: this.$store.state.invoice });
-        this.$router.push({ path: '/lightning/pay/success' });
+        await this.$http.post(`${baseUrl}:3002/v1/lnd/lightning/payInvoice`, { paymentRequest: this.invoice });
+        this.$router.push({ path: '/popup/pay/success' });
       } catch (err) {
         this.$notify({ group: 'alerts', type: 'error', title: 'Error', text: `${err.response.data}`, position: 'top center' });
       } finally {
@@ -109,7 +110,7 @@ export default {
 
 .data-group {
   border: none;
-  margin-top: 2rem;
+  margin-top: 1rem;
   min-height: 350px;
 
   textarea {
@@ -213,7 +214,7 @@ export default {
 }
 
 #back-button {
-  cursor: pointer;
+  visibility: hidden;
 }
 
 #forward-button {

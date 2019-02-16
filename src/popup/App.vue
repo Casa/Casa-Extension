@@ -6,13 +6,15 @@
 
 <script>
 import store from '../store';
-
 const defaultLayout = 'default';
 
 const intercept = function(err) {
   return new Promise(function(resolve, reject) {
     // handle expired JWT
     if (err.response && err.response.status === 401 && err.response.data === 'Invalid JWT') {
+      // Store intended route for redirect upon authentication
+      localStorage.setItem('nextPath', store.getters.routeData.path);
+      // Clear expired auth data
       store.dispatch('logout');
       this.$route.push('/login');
     }
@@ -36,6 +38,20 @@ export default {
 * {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, 'Apple Color Emoji', Arial, sans-serif, 'Segoe UI Emoji', 'Segoe UI Symbol';
   -webkit-font-smoothing: subpixel-antialiased;
+}
+
+@font-face {
+  font-family: 'Monda';
+  font-style: normal;
+  font-weight: 400;
+  src: url('~assets/fonts/monda.woff2');
+}
+
+.numeric {
+  font-family: 'Monda', Arial, sans-serif;
+  -webkit-font-smoothing: subpixel-antialiased;
+  letter-spacing: -0.9px;
+  font-size: 30px;
 }
 
 ::-webkit-scrollbar {
@@ -104,20 +120,31 @@ export default {
 }
 
 .currency-group .btc,
+.currency-group .sats,
 .currency-group .usd {
   position: relative;
-  font-size: 12px;
+  font-size: 16px;
   color: #a29bbc;
 }
 
 .currency-group .btc:after {
+  font-size: 12px;
   position: absolute;
   top: 0.8em;
   right: 1em;
   content: 'BTC';
 }
 
+.currency-group .sats:after {
+  font-size: 12px;
+  position: absolute;
+  top: 0.8em;
+  right: 1em;
+  content: 'SATS';
+}
+
 .currency-group .usd:after {
+  font-size: 12px;
   position: absolute;
   top: 0.8em;
   right: 1em;
@@ -125,6 +152,11 @@ export default {
 }
 
 .currency-group .btc input {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.currency-group .sats input {
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
 }
@@ -162,22 +194,5 @@ input {
 
 .form-control:disabled {
   background-color: rgba(255, 255, 255, 0.03);
-}
-
-.btc-heartbeat {
-  font-size: 16px;
-}
-
-.btc-heartbeat:before {
-  content: '';
-  margin-right: 5px;
-  margin-left: 5px;
-  display: inline-block;
-  width: 10px;
-  height: 10px;
-  border-radius: 10px;
-  background-color: #ff7200;
-  position: relative;
-  top: 0;
 }
 </style>

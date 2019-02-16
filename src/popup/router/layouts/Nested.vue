@@ -1,9 +1,6 @@
 <template>
   <div class="popup-container">
-    <b-navbar> <img id="back-button" src="~assets/images/back.svg" class="d-inline-block align-top" alt="back" @click.prevent="$router.back()" /> </b-navbar>
-    <main class="popup-main">
-      <transition-page> <router-view /> </transition-page>
-    </main>
+    <transition-page> <router-view /> </transition-page>
   </div>
 </template>
 

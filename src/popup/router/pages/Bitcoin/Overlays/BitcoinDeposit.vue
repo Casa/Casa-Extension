@@ -1,20 +1,26 @@
 <template>
   <div id="bitcoin-deposit" class="overlay">
-    <div class="overlay_inner">
-      <h4>Deposit Bitcoin</h4>
-      <p class="details">You’ll need to use this code to deposit Bitcoin to your Bitcoin Node.</p>
-      <section class="copy-request">
-        <p>{{ address }}</p>
-        <a v-if="!copied" type="button" class="btn casa-button" v-clipboard:copy="address" v-clipboard:success="onCopy" v-clipboard:error="onError">Copy</a>
-        <a v-if="copied" type="button" class="btn casa-button" v-clipboard:copy="address" v-clipboard:success="onCopy" v-clipboard:error="onError">
-          <img src="~assets/images/btn-check.svg" alt="check" /> Copied</a
-        >
-      </section>
-      <br />
-      <p class="details">Or scan this QR code:</p>
-      <section class="qr-code"><qr-code :text="address" :size="160"></qr-code></section>
-      <a class="btn casa-button btn-block btn-done" href="#" aria-label="close" @click.prevent="$router.push('/lightning')">Done</a>
-    </div>
+    <b-navbar>
+      <img id="back-button" src="~assets/images/back.svg" class="d-inline-block align-top" alt="back" @click.prevent="$router.back()" />
+      <h3 class="page-header">Deposit Bitcoin</h3>
+      <img id="forward-button" src="~assets/images/back.svg" />
+    </b-navbar>
+    <main class="popup-main">
+      <div class="overlay_inner">
+        <p class="details">You’ll need to use this code to deposit Bitcoin to your Bitcoin Node.</p>
+        <section class="copy-request">
+          <p>{{ address }}</p>
+          <a v-if="!copied" type="button" class="btn casa-button" v-clipboard:copy="address" v-clipboard:success="onCopy" v-clipboard:error="onError">Copy</a>
+          <a v-if="copied" type="button" class="btn casa-button" v-clipboard:copy="address" v-clipboard:success="onCopy" v-clipboard:error="onError">
+            <img src="~assets/images/btn-check.svg" alt="check" /> Copied</a
+          >
+        </section>
+        <br />
+        <p class="details">Or scan this QR code:</p>
+        <section class="qr-code"><qr-code :text="address" :size="160"></qr-code></section>
+        <a class="btn casa-button btn-block btn-done" href="#" aria-label="close" @click.prevent="$router.push('/lightning')">Done</a>
+      </div>
+    </main>
   </div>
 </template>
 
@@ -49,6 +55,24 @@ export default {
 
 <style lang="scss">
 #bitcoin-deposit {
+  .navbar {
+    background-color: #160c46;
+  }
+
+  .popup-main {
+    color: #fff !important;
+    background-color: #160c46;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+
+  .page-header {
+    font-size: 20px;
+    font-weight: bold;
+    color: #fff;
+    margin-top: 0.75rem;
+  }
+
   .details {
     font-size: 18px;
     font-weight: 500;
@@ -121,6 +145,11 @@ export default {
     border-radius: 20px;
   }
 
+  .casa-button.btn-block {
+    padding: 1rem;
+    margin-top: 7rem;
+  }
+
   section.qr-code > div > img {
     background: #fff;
     padding: 0.5rem !important;
@@ -129,5 +158,13 @@ export default {
   .btn-done {
     border-radius: 5px !important;
   }
+}
+
+#back-button {
+  cursor: pointer;
+}
+
+#forward-button {
+  visibility: hidden;
 }
 </style>

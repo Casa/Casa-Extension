@@ -5,7 +5,9 @@
       <content-loader v-if="infoLoading" :animate="true" :height="50" :width="400" :speed="1.5" primaryColor="#160c46" secondaryColor="#a29bbc">
         <rect x="128.44" y="13.61" rx="5" ry="5" width="77.42" height="35.5" /> <rect x="217.44" y="17.61" rx="5" ry="5" width="50.78" height="30.9" />
       </content-loader>
-      <h1 v-else>{{ btcBalance | btc }} <span class="small-text btc-heartbeat">BTC</span></h1>
+      <h1 v-else>
+        <span class="numeric">{{ btcBalance | units }}</span> <units-badge />
+      </h1>
       <span class="balance-info">Balance on-chain</span> <br /><br />
       <img src="~assets/images/qr-code.svg" style="display:none;" /> <img src="~assets/images/send.svg" style="display:none;" />
       <button-action type="link" to="/bitcoin/send" value="Withdraw" size="large" img="/src/assets/images/send.svg"></button-action>
@@ -31,7 +33,7 @@
                 </div>
                 <div class="tx-col-3">
                   <h2>
-                    <span>{{ tx.amount | btc }}</span> BTC
+                    <span>{{ tx.amount | units }}</span> <span v-if="units === 'btc'">BTC</span><span v-else>sats</span>
                   </h2>
                   <h3>${{ ((parseInt(tx.amount) / 100000000) * rate).toFixed(2) }}</h3>
                 </div>
@@ -68,7 +70,7 @@
                 </div>
                 <div class="tx-col-3">
                   <h2>
-                    <span>{{ tx.amount | btc }}</span> BTC
+                    <span>{{ tx.amount | units }}</span> <span v-if="units === 'btc'">BTC</span><span v-else>sats</span>
                   </h2>
                   <h3>${{ ((parseInt(tx.amount) / 100000000) * rate).toFixed(2) }}</h3>
                 </div>
@@ -82,7 +84,7 @@
       <div class="tx-list placeholder" v-if="noTxHistory"><h2>No transactions found</h2></div>
     </div>
 
-    <p>View<router-link to="/settings">Settings</router-link>.</p>
+    <p>View<router-link to="/setup">Settings</router-link>.</p>
   </div>
 </template>
 
@@ -97,6 +99,7 @@ export default {
   data() {
     return {
       rate: 0,
+      units: '',
       btcBalance: '',
       pendingTxs: [],
       completedTxs: [],
@@ -109,6 +112,7 @@ export default {
 
   async created() {
     const baseUrl = this.$store.state.settings.baseUrl;
+    this.units = this.$store.state.settings.units;
     try {
       const { balance } = (await this.$http.get(`${baseUrl}:3002/v1/pages/lnd`)).data;
       this.btcBalance = balance.wallet.totalBalance;

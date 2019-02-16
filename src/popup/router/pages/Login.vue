@@ -17,27 +17,28 @@
 </template>
 
 <script>
-import axios from 'axios';
-
 export default {
   name: `Login`,
-
   data() {
     return {
+      nextPath: '',
       password: '',
-      pending: '',
+      pending: false,
     };
   },
-
+  async created() {
+    // store intended path for redirect after authentication
+    this.nextPath = localStorage.getItem('nextPath') || '/lightning';
+  },
   methods: {
     onSubmit: async function(evt) {
       evt.preventDefault();
       try {
         this.pending = true;
         await this.$store.dispatch('login', { password: this.password });
-        this.$router.push('/lightning');
+        this.$router.push(this.nextPath);
       } catch (err) {
-        this.$notify({ group: 'alerts', type: 'error', title: 'Authentication Failed', text: `Please verify your password and try again.`, position: 'top center' });
+        this.$notify({ group: 'alerts', type: 'error', title: 'Authentication Failed', text: `Please verify your password and try again.` });
       } finally {
         this.pending = false;
       }
@@ -47,85 +48,42 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.settings h4 {
-  margin-top: 0.5em;
-  font-size: 24px;
-  font-weight: bold;
-  line-height: 1.5em;
-}
-
-p.instructions {
-  color: #a29bbc;
-  font-size: 18px;
-  margin: 1.5em 0;
-  line-height: 1.5em;
-}
-
-* {
-  color: #fff;
-}
-
 .settings {
   margin: 0 1.5rem;
-}
 
-.popup-main {
-  height: 100% !important;
-}
+  h4 {
+    margin-top: 0.5em;
+    color: #fff;
+    font-size: 24px;
+    font-weight: bold;
+    line-height: 1.5em;
+  }
 
-.help-link {
-  color: #3bccfc;
-  text-decoration: none;
-}
+  .instructions {
+    color: #a29bbc;
+    font-size: 18px;
+    margin: 1.5em 0;
+    line-height: 1.5em;
+  }
 
-.report-error {
-  color: #f0649e;
-  font-size: 16px;
-  font-weight: 500;
-  display: inherit;
-  float: right;
-}
+  .b-form-group input {
+    height: 55px;
+    color: #fff;
+  }
 
-.report-error img {
-  display: inline-block;
-  vertical-align: top;
-  margin-right: 0.25em;
-  height: 25px;
-}
+  .base-url {
+    font-weight: bold;
+    font-size: 18px;
+  }
 
-.report-success {
-  color: #2dcccd;
-  float: right;
-}
-
-.report-error.level:not(:last-child) {
-  margin-bottom: inherit;
-}
-
-.b-form-group input {
-  height: 55px;
-  color: #fff;
-}
-
-.base-url {
-  font-weight: bold;
-  font-size: 18px;
-}
-
-.casa-button {
-  padding: 1rem;
-  margin-left: -1px;
-  text-decoration: none !important;
-  -webkit-appearance: none;
-  display: inline-block;
-  font-size: 16px;
-  font-weight: bold;
-  border-radius: 4px;
-  background-image: linear-gradient(to right, #5839f5, #9469fe);
-  border: none;
-  width: 100%;
-  position: absolute;
-  bottom: 1.5rem;
-  max-width: 354px;
+  .casa-button {
+    padding: 1rem;
+    font-weight: bold;
+    background-image: linear-gradient(to right, #5839f5, #9469fe);
+    border: none;
+    width: 100%;
+    position: relative;
+    top: 240px;
+  }
 }
 </style>

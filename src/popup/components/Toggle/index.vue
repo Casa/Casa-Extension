@@ -186,6 +186,11 @@ export default {
       toggled: !!this.value,
     };
   },
+  created() {
+    if (this.$store.state.route.name === 'bitcoin') {
+      this.toggled = false;
+    }
+  },
   methods: {
     toggle(event) {
       this.toggled = !this.toggled;

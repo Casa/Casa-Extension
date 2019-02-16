@@ -1,19 +1,26 @@
 <template>
   <div>
-    <section class="data-group">
-      <h3 class="header-text">Review Bitcoin Withdrawal</h3>
-      <span class="destination">TO: {{ transaction.addr }}</span> <br />
-      <p class="payment-info">{{ transaction.amt }} <span class="btc-heartbeat"> BTC</span></p>
-      <span>{{ '$' + (transaction.amt * rate).toFixed(2) }}</span> <br />
-      <a class="btn casa-button btn-block" @click="sendPayment" name="button" :disabled="pending === true">
-        <span v-if="!pending">Confirm Withdrawal</span> <span v-if="pending" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-        <span v-if="pending">Sending</span>
-      </a>
-    </section>
-    <section class="wallet-options">
-      <p class="payment-info">{{ this.remainingBalance | btc }} <span class="btc-heartbeat"> BTC</span></p>
-      <p class="payment-details">NEW BITCOIN NODE BALANCE</p>
-    </section>
+    <b-navbar>
+      <img id="back-button" src="~assets/images/back.svg" class="d-inline-block align-top" alt="back" @click.prevent="$router.back()" />
+      <h3 class="page-header">Review Bitcoin Withdrawal</h3>
+      <img id="forward-button" src="~assets/images/back.svg" />
+    </b-navbar>
+    <main class="popup-main">
+      <section class="data-group">
+        <p><span class="payment-badge">You're Sending</span></p>
+        <span class="destination">{{ transaction.addr }}</span> <br />
+        <p class="payment-info">{{ transaction.amt | units }} <units-badge /></p>
+        <span class="payment-fiat">{{ satsToUsd() }}</span> <br />
+        <a class="btn casa-button btn-block" @click="sendPayment" name="button" :disabled="pending === true">
+          <span v-if="!pending">Confirm Withdrawal</span> <span v-if="pending" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+          <span v-if="pending">Sending</span>
+        </a>
+      </section>
+      <section class="wallet-options">
+        <p class="payment-info">{{ this.remainingBalance | units }} <units-badge /></p>
+        <p class="payment-details">NEW BITCOIN NODE BALANCE</p>
+      </section>
+    </main>
   </div>
 </template>
 
@@ -23,13 +30,14 @@ export default {
   data() {
     return {
       rate: '',
+      units: '',
       remainingBalance: '',
       pending: false,
     };
   },
   async created() {
     const baseUrl = this.$store.state.settings.baseUrl;
-
+    this.units = this.$store.state.settings.units;
     // Get lightning channel settings
     try {
       const { balance } = (await this.$http.get(`${baseUrl}:3002/v1/pages/lnd`)).data;
@@ -50,7 +58,8 @@ export default {
     async sendPayment() {
       this.pending = true;
       const baseUrl = this.$store.state.settings.baseUrl;
-      const payload = { amt: Math.round(this.transaction.amt * 100000000), addr: this.transaction.addr };
+      const payload = { addr: this.transaction.addr, amt: this.transaction.amt };
+      // funds are always sent as sats
       try {
         const tx = await this.$http.post(`${baseUrl}:3002/v1/lnd/transaction`, payload);
         this.$router.push({ path: '/bitcoin/send/success' });
@@ -59,6 +68,13 @@ export default {
       } finally {
         this.pending = false;
       }
+    },
+    satsToUsd() {
+      let usd = ((parseInt(this.transaction.amt) / 100000000) * this.rate).toFixed(2);
+      if (isNaN(usd)) {
+        return 0;
+      }
+      return '$' + usd;
     },
   },
   computed: {
@@ -72,35 +88,58 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.navbar {
+  background-color: #160c46;
+}
+
+.popup-main {
+  color: #fff !important;
+  background-color: #160c46;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.page-header {
+  font-size: 20px;
+  font-weight: bold;
+  color: #fff;
+  margin-top: 0.75rem;
+}
+
 .header-text {
   margin-bottom: 1rem;
 }
 
 .destination {
-  font-size: 15px;
+  display: inherit;
+  font-size: 16px;
+  letter-spacing: 0.5px;
 }
 
-.ext-link {
-  padding-top: 0.33em;
-  padding-bottom: 0.33em;
-  margin-top: 1rem;
-  border-radius: 24px;
-  color: #ffffff;
-  background-color: rgba(255, 255, 255, 0.1);
-  display: block;
-  margin: 1rem auto;
+.payment-fiat {
+  display: inherit;
+  font-size: 17px;
+}
+
+p {
+  text-align: center;
+
+  .payment-badge {
+    border-radius: 15px;
+    background-color: #0a0525;
+    margin: 0 auto;
+    padding: 7px 10px;
+    text-transform: uppercase;
+    letter-spacing: 1.25px;
+    font-size: 15px;
+    font-weight: bold;
+  }
 }
 
 .wallet-options {
   background-color: #0a0525;
   padding: 4rem 1.5rem 6rem;
-  margin-top: 3rem;
-}
-
-.wallet-options > a.ext-link > img {
-  max-height: 11px !important;
-  margin-left: 10px !important;
-  margin-top: -2px !important;
+  margin-top: 2rem;
 }
 
 .wallet-options p {
@@ -109,19 +148,20 @@ export default {
 
 .data-group {
   border: none;
+  padding-top: 2rem;
 }
 
-.data-group textarea {
-  background-color: rgba(255, 255, 255, 0.03);
+.data-group * {
+  text-align: center;
 }
 
 .payment-info {
   font-size: 24px;
-  margin: 1rem 0;
+  margin: 0 0 1rem;
 }
 
 .payment-info span {
-  font-size: 12px;
+  font-size: 14px;
   font-weight: bold;
 }
 
@@ -136,7 +176,6 @@ export default {
 
 .casa-button {
   padding: 1rem;
-  margin-left: -1px;
   text-decoration: none !important;
   -webkit-appearance: none;
   display: inline-block;
@@ -145,7 +184,7 @@ export default {
   border-radius: 4px;
   background-image: linear-gradient(to right, #5839f5, #9469fe);
   border: none;
-  margin-top: 0.25rem;
+  margin-top: 2rem;
 }
 
 .btn-outline {
@@ -155,5 +194,9 @@ export default {
 .btn-white {
   background: #fff;
   color: #000 !important;
+}
+
+#forward-button {
+  visibility: hidden;
 }
 </style>

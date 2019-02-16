@@ -1,23 +1,35 @@
 <template>
   <div>
-    <section class="data-group">
-      <h3>Withdraw Bitcoin</h3>
-      <b-form-group class="font-weight-bold" label="Recipient BTC Address"> <b-form-input v-model="address"></b-form-input> </b-form-group>
-      <b-form-group class="font-weight-bold currency-group" label="Amount">
-        <div class="btc"><b-form-input class="btc" v-model="amount.sats" placeholder="BTC" required></b-form-input></div>
-        <div class="usd"><b-form-input class="usd" :value="(amount.sats * amount.usd).toFixed(2)" placeholder="USD" disabled></b-form-input></div>
-      </b-form-group>
-      <a @click="sendPayment" class="btn casa-button btn-block" name="button">Review Withdrawal</a>
-    </section>
-    <section class="wallet-options">
-      <content-loader v-if="loading" :height="40" :width="400" :speed="2" primaryColor="#160c46" secondaryColor="#a29bbc">
-        <rect x="93.59" y="107.61" rx="5" ry="5" width="220" height="16.5" /> <rect x="115.72" y="7.61" rx="5" ry="5" width="169.51" height="26.71" />
-        <rect x="79.44" y="145" rx="5" ry="5" width="249.48" height="18.42" /> <rect x="125.44" y="83.61" rx="5" ry="5" width="147.4" height="18.27" />
-        <circle cx="346.23" cy="90.61" r="1" />
-      </content-loader>
-      <p v-else class="payment-info">{{ btcBalance | btc }} <span class="btc-heartbeat"> BTC</span></p>
-      <p class="payment-details">BITCOIN NODE BALANCE</p>
-    </section>
+    <b-navbar>
+      <img id="back-button" src="~assets/images/back.svg" class="d-inline-block align-top" alt="back" @click.prevent="$router.back()" />
+      <h3 class="page-header">Withdraw Bitcoin</h3>
+      <img id="forward-button" src="~assets/images/back.svg" />
+    </b-navbar>
+    <main class="popup-main">
+      <section class="data-group">
+        <b-form-group class="font-weight-bold" label="Recipient BTC Address"> <b-form-input v-model="address"></b-form-input> </b-form-group>
+        <b-form-group class="font-weight-bold currency-group" label="Amount">
+          <div v-if="units === 'btc'">
+            <div class="btc"><b-form-input class="btc" v-model="amount.btc" placeholder="BTC" required></b-form-input></div>
+            <div class="usd"><b-form-input class="usd" :value="btcToUsd()" placeholder="USD"></b-form-input></div>
+          </div>
+          <div v-else>
+            <div class="sats"><b-form-input class="sats" v-model="amount.sats" placeholder="SATS" required></b-form-input></div>
+            <div class="usd"><b-form-input class="usd" :value="satsToUsd()" placeholder="USD"></b-form-input></div>
+          </div>
+        </b-form-group>
+        <a @click="sendPayment" class="btn casa-button btn-block" name="button">Review Withdrawal</a>
+      </section>
+      <section class="wallet-options">
+        <content-loader v-if="loading" :height="40" :width="400" :speed="2" primaryColor="#160c46" secondaryColor="#a29bbc">
+          <rect x="93.59" y="107.61" rx="5" ry="5" width="220" height="16.5" /> <rect x="115.72" y="7.61" rx="5" ry="5" width="169.51" height="26.71" />
+          <rect x="79.44" y="145" rx="5" ry="5" width="249.48" height="18.42" /> <rect x="125.44" y="83.61" rx="5" ry="5" width="147.4" height="18.27" />
+          <circle cx="346.23" cy="90.61" r="1" />
+        </content-loader>
+        <p v-else class="payment-info">{{ btcBalance | units }} <units-badge /></p>
+        <p class="payment-details">BITCOIN NODE BALANCE</p>
+      </section>
+    </main>
   </div>
 </template>
 
@@ -37,13 +49,16 @@ export default {
       chBalance: '',
       amount: {
         sats: 0,
+        btc: 0,
         usd: 0,
       },
+      units: '',
       loading: true,
     };
   },
 
   async created() {
+    this.units = this.$store.state.settings.units;
     try {
       const baseUrl = this.$store.state.settings.baseUrl;
       const { balance } = (await this.$http.get(`${baseUrl}:3002/v1/pages/lnd`)).data;
@@ -65,14 +80,50 @@ export default {
 
   methods: {
     async sendPayment() {
-      this.$store.dispatch('setSendCoinsRequest', { addr: this.address, amt: this.amount.sats });
+      const payload = { addr: this.address, amt: this.amount.sats };
+      if (this.units === 'btc') {
+        payload.amt = this.amount.btc * 100000000;
+      }
+      this.$store.dispatch('setSendCoinsRequest', payload);
       this.$router.push('/bitcoin/send/review');
+    },
+    btcToUsd() {
+      let usd = (this.amount.btc * this.amount.usd).toFixed(2);
+      if (isNaN(usd)) {
+        return 0;
+      }
+      return usd;
+    },
+    satsToUsd() {
+      let usd = ((parseInt(this.amount.sats) / 100000000) * this.amount.usd).toFixed(2);
+      if (isNaN(usd)) {
+        return 0;
+      }
+      return usd;
     },
   },
 };
 </script>
 
 <style lang="scss" scoped>
+.navbar {
+  background-color: #160c46;
+}
+
+.popup-main {
+  color: #fff !important;
+  background-color: #160c46;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.page-header {
+  font-size: 20px;
+  font-weight: bold;
+  color: #fff;
+  margin-top: 0.75rem;
+}
+
 .ext-link {
   padding-top: 0.33em;
   padding-bottom: 0.33em;
@@ -118,7 +169,7 @@ export default {
 }
 
 .payment-info span {
-  font-size: 12px;
+  font-size: 14px;
   font-weight: bold;
 }
 
@@ -134,7 +185,6 @@ export default {
 
 .casa-button {
   padding: 1rem;
-  margin-left: -1px;
   text-decoration: none !important;
   -webkit-appearance: none;
   display: inline-block;
@@ -143,7 +193,7 @@ export default {
   border-radius: 4px;
   background-image: linear-gradient(to right, #5839f5, #9469fe);
   border: none;
-  margin-top: 1rem;
+  margin-top: 2rem;
 }
 
 .btn-outline {
@@ -153,5 +203,13 @@ export default {
 .btn-white {
   background: #fff;
   color: #000 !important;
+}
+
+#back-button {
+  cursor: pointer;
+}
+
+#forward-button {
+  visibility: hidden;
 }
 </style>

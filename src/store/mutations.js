@@ -7,6 +7,9 @@ export default {
   [types.SET_BASE_URL](state, payload) {
     state.settings.baseUrl = payload;
   },
+  [types.SET_UNITS](state, payload) {
+    state.settings.units = payload;
+  },
   [types.SET_INVOICE](state, payload) {
     state.invoice = payload;
   },

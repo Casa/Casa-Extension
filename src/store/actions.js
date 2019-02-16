@@ -27,6 +27,10 @@ export const setBaseUrl = async ({ commit, state }, payload) => {
   commit(types.SET_BASE_URL, payload);
 };
 
+export const setUnits = async ({ commit, state }, payload) => {
+  commit(types.SET_UNITS, payload);
+};
+
 export const setIntroFlag = async ({ commit, state }) => {
   commit(types.SET_INTRO_FLAG, true);
 };

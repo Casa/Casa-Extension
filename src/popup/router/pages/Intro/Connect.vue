@@ -1,5 +1,5 @@
 <template>
-  <div class="overlay container h-100">
+  <div class="overlay container">
     <div class="overlay_inner">
       <div class="overlay-message">
         <div class="spinner-border text-light connecting" role="status"><span class="sr-only">Loading...</span></div>
@@ -31,22 +31,19 @@ export default {
       this.connected = true;
       // Don't show connection if using manual override
       if (!this.clickedManualConfig) {
-        this.$notify({ group: 'alerts', type: 'success', title: 'Connected', text: 'Connected to casa-node.local.', position: 'top center' });
+        this.$notify({ group: 'alerts', type: 'success', title: 'Connected', text: 'Connected to casa-node.local.' });
       }
     } catch (err) {
       // Don't show error if using manual override
       if (!this.clickedManualConfig) {
-        this.$notify({
-          group: 'alerts',
-          type: 'error',
-          title: 'Connection Failed',
-          text: 'There was no response from casa-node.local. Try entering the IP address manually.',
-        });
+        this.$notify({ group: 'alerts', type: 'error', title: 'Connection Failed', text: 'No response from casa-node.local. Try entering the IP manually.' });
       }
     } finally {
-      this.pending = false;
-      await delayRequest(2000); // delay briefly before transitioning views
-      this.handleRedirect();
+      if (!this.clickedManualConfig) {
+        this.pending = false;
+        await delayRequest(2000); // delay briefly before transitioning views
+        this.handleRedirect();
+      }
     }
   },
   destroyed() {
@@ -55,7 +52,7 @@ export default {
   methods: {
     setManually() {
       this.clickedManualConfig = true;
-      this.$router.push('/settings');
+      this.$router.push('/setup');
     },
 
     handleRedirect() {
@@ -65,8 +62,8 @@ export default {
         this.$store.dispatch('setIntroFlag');
         this.$router.push('/auth');
       } else {
-        // redirect to settings for manual configuration
-        this.$router.push('/settings');
+        // redirect to setup for manual configuration
+        this.$router.push('/setup');
       }
     },
   },
@@ -138,17 +135,16 @@ export default {
   color: #fff;
 }
 
+.connecting {
+  margin: 0 auto 2rem;
+  display: block;
+  height: 100px;
+  width: 100px;
+}
+
 #home-logo {
   width: 120px;
   height: auto;
   margin-bottom: 1.25rem;
-}
-
-.connecting {
-  margin: 0 auto;
-  display: block;
-  height: 100px;
-  width: 100px;
-  margin-bottom: 2rem;
 }
 </style>

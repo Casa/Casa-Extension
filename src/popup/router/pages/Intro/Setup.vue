@@ -1,22 +1,22 @@
 <template>
   <div class="settings">
-    <h4>Update Your Settings</h4>
+    <h4>Manually Connect to Your Casa Node</h4>
     <p class="help-text">
       You'll need to locate your Casa Node's local IP address to finish setup.
       <a class="help-link" href="https://keys.casa/node-help/" target="_blank" rel="noopener">See Our Guide</a>
     </p>
     <form @submit="onSubmit">
       <b-form-group class="base-url" label="Casa Node IP Address"> <b-form-input v-model="baseUrl" :class="{ error: error }"></b-form-input> </b-form-group>
-
-      <b-form-group class="base-url" label="Preferred BTC Units"> <b-form-select v-model="selectedUnit" :options="units" class="btc-units mb-3"></b-form-select> </b-form-group>
       <div class="buttons">
         <button class="btn casa-button" type="submit" name="button" :disabled="pending === true">
-          <span v-if="!pending">Update</span> <span v-if="pending" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-          <span v-if="pending">Updating</span>
+          <span v-if="!pending">Connect</span> <span v-if="pending" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+          <span v-if="pending">Connecting</span>
         </button>
       </div>
     </form>
-    <p v-if="error" class="report-error">Connection unsuccessful. Please try again or See Our Guide</p>
+    <p v-if="error" class="report-error">
+      Connection unsuccessful. Please try again or <a class="help-link" href="https://keys.casa/node-help/" target="_blank" rel="noopener">See Our Guide</a>
+    </p>
   </div>
 </template>
 
@@ -26,19 +26,14 @@ const ipRegex = /^((http:\/\/|https:\/\/)?([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9
 const domainRegex = /^((http:\/\/|https:\/\/)?([a-zA-Z]|[a-zA-Z][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z]|[A-Za-z][A-Za-z0-9\-]*[A-Za-z0-9])$/;
 
 export default {
-  name: `Settings`,
+  name: `Setup`,
   data() {
     return {
       baseUrl: '',
       error: false,
       pending: false,
-      units: [{ value: 'sats', text: 'Satoshis (sats)' }, { value: 'btc', text: 'Bitcoin (BTC)' }],
-      selectedUnit: 'sats',
+      setupComplete: true,
     };
-  },
-  async created() {
-    this.baseUrl = this.$store.state.settings.baseUrl;
-    this.selectedUnit = this.$store.state.settings.units;
   },
   computed: {
     validIP() {
@@ -58,8 +53,8 @@ export default {
           this.pending = true;
           await axios({ timeout: 10000, url: `${this.baseUrl}:3000/ping` });
           this.$store.dispatch('setBaseUrl', this.baseUrl);
-          this.$store.dispatch('setUnits', this.selectedUnit);
-          this.$router.push('/lightning');
+          this.$store.dispatch('setIntroFlag');
+          this.$router.push('/auth');
         } catch (err) {
           this.error = true;
         } finally {
@@ -158,10 +153,6 @@ p {
 .base-url {
   font-weight: bold;
   font-size: 18px;
-}
-
-.btc-units {
-  height: 55px;
 }
 
 .buttons {

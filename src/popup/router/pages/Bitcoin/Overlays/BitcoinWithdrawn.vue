@@ -4,7 +4,7 @@
       <div class="overlay-message">
         <img src="~assets/images/check-success.svg" alt="success" />
         <h4 class="text-center">Bitcoin Withdrawn</h4>
-        <h2 class="text-center">{{ transaction.amt }} <span class="heartbeat">BTC</span></h2>
+        <h2 class="text-center">{{ transaction.amt | units }} <units-badge /></h2>
       </div>
       <div class="overlay-buttons">
         <a class="btn casa-button btn-outline btn-block" name="button" @click.prevent="$router.push('/bitcoin/send/receipt')">View Receipt</a>
@@ -21,6 +21,11 @@ export default {
     transaction: {
       get() {
         return this.$store.state.newTransaction;
+      },
+    },
+    units: {
+      get() {
+        return this.$store.state.settings.units;
       },
     },
   },
@@ -105,22 +110,5 @@ export default {
 
 a.btn.casa-button.btn-outline.btn-block {
   margin-bottom: 1rem;
-}
-
-.heartbeat {
-  font-size: 16px;
-}
-
-.btc-heartbeat:before {
-  content: '';
-  margin-right: 5px;
-  margin-left: 5px;
-  display: inline-block;
-  width: 10px;
-  height: 10px;
-  border-radius: 10px;
-  background-color: #fff;
-  position: relative;
-  top: 0;
 }
 </style>

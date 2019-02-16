@@ -7,11 +7,9 @@
         <b-form-group class="password-label" label="Casa Node Password" label-for="Casa Node Password">
           <b-form-input id="password" type="password" v-model="password" required></b-form-input>
         </b-form-group>
-
         <div class="buttons">
           <b-button class="btn casa-button" type="submit" :disabled="pending === true">
-            <span v-if="!pending">Sign In</span> <span v-if="pending" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-            <span v-if="pending">Connecting</span>
+            <span v-if="!pending">Sign In</span> <span v-if="pending" class="spinner-border spinner-border-sm" role="status"></span> <span v-if="pending">Connecting</span>
           </b-button>
         </div>
       </b-form>
@@ -23,15 +21,13 @@
 import axios from 'axios';
 
 export default {
-  name: `Login`,
-
+  name: `Auth`,
   data() {
     return {
       password: '',
-      pending: '',
+      pending: false,
     };
   },
-
   methods: {
     onSubmit: async function(evt) {
       evt.preventDefault();
@@ -50,93 +46,60 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.settings h4 {
-  font-size: 24px;
-  font-weight: bold;
-  line-height: 1.5em;
-}
-
-.settings .help-text {
-  margin: 1.5em 0;
-  line-height: 1.5em;
-  color: #a29bbc;
-}
-
-.password-label {
-  font-weight: bold;
-  font-size: 18px;
-}
-
-* {
-  color: #fff;
-}
-
 .settings {
   margin: 0 1.5rem;
-}
 
-.popup-main {
-  height: 100% !important;
-}
+  h4 {
+    font-size: 24px;
+    font-weight: bold;
+    line-height: 1.5em;
+    color: #fff;
+  }
 
-.help-link {
-  color: #3bccfc;
-  text-decoration: none;
-}
+  .help-text {
+    margin: 1.5em 0;
+    line-height: 1.5em;
+    color: #a29bbc;
+  }
 
-.report-error {
-  color: #f0649e;
-  font-size: 16px;
-  font-weight: 500;
-  display: inherit;
-  float: right;
-}
+  .password-label {
+    font-weight: bold;
+    font-size: 18px;
+  }
 
-.report-error img {
-  display: inline-block;
-  vertical-align: top;
-  margin-right: 0.25em;
-  height: 25px;
-}
+  .popup-main {
+    height: 100% !important;
+  }
 
-.report-success {
-  color: #2dcccd;
-  float: right;
-}
+  .help-link {
+    color: #3bccfc;
+    text-decoration: none;
+  }
 
-.report-error.level:not(:last-child) {
-  margin-bottom: inherit;
-}
+  .b-form-group input {
+    height: 55px;
+    color: #fff;
+  }
 
-.b-form-group input {
-  height: 55px;
-  color: #fff;
-}
+  .buttons {
+    position: absolute;
+    bottom: 2em;
+    left: 0;
+    right: 0;
+    padding: 0 2em 0 1.8em;
+  }
 
-#password {
-  font-weight: bold;
-  font-size: 18px;
-}
+  .casa-button {
+    border: none;
+    width: 100%;
+    padding: 1rem;
+    font-weight: bold;
+    background-image: linear-gradient(to right, #5839f5, #9469fe);
+  }
 
-.buttons {
-  position: absolute;
-  bottom: 2em;
-  left: 0;
-  right: 0;
-  padding: 0 2em 0 1.8em;
-}
-
-.casa-button {
-  padding: 1rem;
-  text-decoration: none !important;
-  -webkit-appearance: none;
-  display: inline-block;
-  font-size: 16px;
-  font-weight: bold;
-  border-radius: 4px;
-  background-image: linear-gradient(to right, #5839f5, #9469fe);
-  border: none;
-  width: 100%;
-  max-width: 354px;
+  #password {
+    font-weight: bold;
+    font-size: 18px;
+  }
 }
 </style>

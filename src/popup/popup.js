@@ -25,6 +25,10 @@ import App from './App';
 import store from '../store';
 import router from './router';
 
+// sync store & router
+import { sync } from 'vuex-router-sync';
+sync(store, router);
+
 import axios from 'axios';
 Vue.prototype.$http = axios;
 
@@ -50,9 +54,11 @@ Vue.component('transition-page', TransitionPage);
 // Register Application Components
 import ButtonAction from './components/ButtonAction/index.vue';
 import ButtonLink from './components/ButtonLink/index.vue';
+import UnitsBadge from './components/UnitsBadge/index.vue';
 import Toggle from './components/Toggle/index.vue';
 Vue.component('button-action', ButtonAction);
 Vue.component('button-link', ButtonLink);
+Vue.component('units-badge', UnitsBadge);
 Vue.component('toggle', Toggle);
 
 Vue.use(BootstrapVue);
@@ -80,17 +86,24 @@ Vue.filter('truncate', value => {
 });
 
 // Convert Satoshis to Bitcoin
-Vue.filter('btc', val => {
+Vue.filter('units', val => {
   // Never display numbers as exponents
   BigNumber.config({ EXPONENTIAL_AT: 1e9 });
   const sats = new BigNumber(val);
-  const btc = sats.dividedBy(100000000);
-
-  if (isNaN(btc)) {
-    return 0;
+  // return units by user preferences
+  if (store.getters.getUnits === 'sats') {
+    if (isNaN(sats)) {
+      return 0;
+    }
+    return parseInt(sats).toLocaleString();
+  } else {
+    // return in btc
+    const btc = sats.dividedBy(100000000);
+    if (isNaN(btc)) {
+      return 0;
+    }
+    return btc.decimalPlaces(8).toString();
   }
-
-  return btc.decimalPlaces(8).toString();
 });
 
 global.browser = require('webextension-polyfill');

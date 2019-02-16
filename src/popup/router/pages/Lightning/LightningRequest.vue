@@ -1,22 +1,33 @@
 <template>
   <div>
-    <section class="data-group">
-      <h3>Request Lightning Payment</h3>
-      <b-form-group class="font-weight-bold currency-group" label="Amount">
-        <div class="btc"><b-form-input v-model="amount.btc" placeholder="BTC" required></b-form-input></div>
-        <div class="usd"><b-form-input :value="(amount.btc * amount.usd).toFixed(2)" placeholder="USD" disabled></b-form-input></div>
-      </b-form-group>
-      <b-form-group class="font-weight-bold" label="Memo *optional"> <b-form-textarea :rows="3" v-model="memo"></b-form-textarea> </b-form-group>
-      <a class="btn casa-button btn-block" @click="createRequest" name="button" :disabled="pending === true">
-        <span v-if="!pending">Generate Payment Code</span> <span v-if="pending" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-        <span v-if="pending">Generating</span>
-      </a>
-    </section>
-
-    <section class="wallet-options">
-      <p class="payment-info">{{ maxPaymentOut | btc }}<span class="btc-heartbeat"> BTC</span></p>
-      <p class="payment-details">MAX OUTGOING PAYMENT</p>
-    </section>
+    <b-navbar>
+      <img id="back-button" src="~assets/images/back.svg" class="d-inline-block align-top" alt="back" @click.prevent="$router.back()" />
+      <h3 class="page-header">Request Lightning Payment</h3>
+      <img id="forward-button" src="~assets/images/back.svg" />
+    </b-navbar>
+    <main class="popup-main">
+      <section class="data-group">
+        <b-form-group class="font-weight-bold currency-group" label="Amount">
+          <div v-if="units === 'btc'">
+            <div class="btc"><b-form-input id="currencyInput" @keyup.native="convertUSD" :value="btc"></b-form-input></div>
+            <div class="usd"><b-form-input @keyup.native="convertBTC" :value="usd" placeholder="USD"></b-form-input></div>
+          </div>
+          <div v-else>
+            <div class="sats"><b-form-input id="currencyInput" @keyup.native="convertUSD" :value="btc"></b-form-input></div>
+            <div class="usd"><b-form-input @keyup.native="convertBTC" :value="usd"></b-form-input></div>
+          </div>
+        </b-form-group>
+        <b-form-group class="font-weight-bold" label="Memo *optional"> <b-form-textarea :rows="3" v-model="memo"></b-form-textarea> </b-form-group>
+        <a class="btn casa-button btn-block" @click="createRequest" name="button" :disabled="pending === true">
+          <span v-if="!pending">Generate Payment Code</span> <span v-if="pending" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+          <span v-if="pending">Generating</span>
+        </a>
+      </section>
+      <section class="wallet-options">
+        <p class="payment-info">{{ maxPaymentOut | units }}<units-badge /></p>
+        <p class="payment-details">MAX OUTGOING PAYMENT</p>
+      </section>
+    </main>
   </div>
 </template>
 
@@ -26,16 +37,19 @@ export default {
   data() {
     return {
       memo: '',
-      amount: {
-        btc: 0,
-        usd: 0,
-      },
+      btc: 0.0,
+      sats: 0,
+      usd: 0.0,
+      exchangeRate: 0.0,
+      units: '',
+      btcSelected: true,
       pending: false,
       maxPaymentIn: '',
       maxPaymentOut: '',
     };
   },
   async created() {
+    this.units = this.$store.state.settings.units;
     const baseUrl = this.$store.state.settings.baseUrl;
 
     try {
@@ -55,7 +69,7 @@ export default {
 
       try {
         const { USD } = (await this.$http.get('https://min-api.cryptocompare.com/data/price?fsym=BTC&tsyms=USD')).data;
-        this.amount.usd = USD;
+        this.exchangeRate = USD;
       } catch (err) {
         this.$notify({ group: 'alerts', type: 'error', title: 'Error', text: `Error getting conversion rate`, position: 'top center' });
       }
@@ -68,8 +82,14 @@ export default {
     async createRequest() {
       this.pending = true;
       const baseUrl = this.$store.state.settings.baseUrl;
-      const payload = { amt: this.amount.btc * 100000000, memo: this.memo };
+      const payload = { memo: this.memo };
 
+      // format btc to sats
+      if (this.units === 'btc') {
+        payload.amt = parseInt(this.btc * 100000000);
+      } else {
+        payload.amt = parseInt(this.btc);
+      }
       try {
         const payReq = await this.$http.post(`${baseUrl}:3002/v1/lnd/lightning/addInvoice`, payload);
         this.$store.dispatch('setPaymentRequest', payReq.data.paymentRequest);
@@ -80,11 +100,66 @@ export default {
         this.pending = false;
       }
     },
+
+    convertUSD: function(e, rate) {
+      this.btcSelected = true;
+      this.calculate(e, rate);
+    },
+
+    convertBTC: function(e, rate) {
+      this.btcSelected = false;
+      this.calculate(e, rate);
+    },
+
+    calculate: function(e, value) {
+      var value = parseFloat(e.target.value);
+      if (isNaN(value)) {
+        this.btc = '';
+        this.usd = '';
+        return;
+      }
+
+      if (this.btcSelected) {
+        this.btc = value;
+
+        if (this.units === 'btc') {
+          this.usd = (value * this.exchangeRate).toFixed(2);
+        } else {
+          this.usd = ((value / 100000000) * this.exchangeRate).toFixed(5);
+        }
+      } else {
+        this.usd = value;
+
+        if (this.units === 'btc') {
+          this.btc = (value / this.exchangeRate).toFixed(5);
+        } else {
+          this.btc = Math.floor((value / this.exchangeRate) * 100000000);
+        }
+      }
+    },
   },
 };
 </script>
 
 <style lang="scss" scoped>
+.navbar {
+  background-color: #160c46;
+}
+
+.popup-main {
+  color: #fff !important;
+  background-color: #160c46;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.page-header {
+  font-size: 20px;
+  font-weight: bold;
+  color: #fff;
+  margin-top: 0.75rem;
+}
+
 .ext-link {
   padding-top: 0.33em;
   padding-bottom: 0.33em;
@@ -100,7 +175,7 @@ export default {
 .wallet-options {
   background-color: #0a0525;
   padding: 2rem 1.5rem;
-  margin-top: 1rem;
+  margin-top: 2.5rem;
 }
 
 .wallet-options > a.ext-link > img {
@@ -160,5 +235,13 @@ export default {
 .btn-white {
   background: #fff;
   color: #000 !important;
+}
+
+#back-button {
+  cursor: pointer;
+}
+
+#forward-button {
+  visibility: hidden;
 }
 </style>

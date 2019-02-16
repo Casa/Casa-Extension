@@ -1,18 +1,38 @@
 <template>
   <div>
-    <section class="data-group">
-      <h4>Create New Lightning Channel</h4>
-      <p class="details">Send transactions directly to another Lightning Node.</p>
-      <b-form-group class="font-weight-bold" label="Channel Peer Name"> <b-form-input v-model="name"></b-form-input> </b-form-group>
-      <b-form-group class="font-weight-bold" label="Purpose of Channel"> <b-form-input v-model="purpose"></b-form-input> </b-form-group>
-      <b-form-group class="font-weight-bold" label="Peer Connection Code"> <b-form-input v-model="connectionCode"></b-form-input> </b-form-group>
-      <b-form-group class="font-weight-bold" label="Funding Amount (in BTC)"> <b-form-input v-model="fundingAmount"></b-form-input> </b-form-group>
-
-      <a class="btn casa-button btn-block" @click="openChannel" name="button" :disabled="pending === true">
-        <span v-if="!pending">Confirm Lightning Channel Opening</span> <span v-if="pending" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-        <span v-if="pending">Opening Channel</span>
-      </a>
-    </section>
+    <b-navbar>
+      <img id="back-button" src="~assets/images/back.svg" class="d-inline-block align-top" alt="back" @click.prevent="$router.back()" />
+      <h3 class="page-header">Create New Lightning Channel</h3>
+      <img id="forward-button" src="~assets/images/back.svg" />
+    </b-navbar>
+    <main class="popup-main">
+      <section class="data-group">
+        <p class="details">Send transactions directly to another Lightning Node.</p>
+        <!-- Channel Name -->
+        <legend class="col-form-label pt-2">Channel Peer Name</legend>
+        <input type="text" v-model="name" class="form-control" />
+        <!-- Channel Purpose  -->
+        <legend class="col-form-label pt-2">Purpose of Channel</legend>
+        <input type="text" v-model="purpose" class="form-control" />
+        <!-- Connection Code -->
+        <legend class="col-form-label pt-2">Peer Connection Code</legend>
+        <input type="text" v-model="connectionCode" class="form-control" />
+        <!-- Funding Amount (BTC) -->
+        <div v-if="units === 'btc'" class="currency-group">
+          <legend class="col-form-label pt-2">Funding Amount</legend>
+          <div class="btc"><input type="text" v-model="amount.btc" class="btc form-control" /></div>
+        </div>
+        <!-- Funding Amount (sats) -->
+        <div v-else class="currency-group">
+          <legend class="col-form-label pt-2">Funding Amount</legend>
+          <div class="sats"><input type="text" v-model="amount.sats" class="sats form-control" /></div>
+        </div>
+        <a class="btn casa-button btn-block" @click="openChannel" name="button" :disabled="pending === true">
+          <span v-if="!pending">Confirm Lightning Channel Opening</span> <span v-if="pending" class="spinner-border spinner-border-sm" role="status"></span>
+          <span v-if="pending"> Opening Channel</span>
+        </a>
+      </section>
+    </main>
   </div>
 </template>
 
@@ -22,25 +42,36 @@ export default {
   data() {
     return {
       manualEntry: false,
-      connectionCode: null,
-      pubKey: null,
-      ip: null,
-      port: null,
-      fundingAmount: null,
-      name: null,
-      purpose: null,
       pending: false,
+      connectionCode: '',
+      pubKey: '',
+      ip: '',
+      port: '',
+      amount: {
+        btc: '',
+        sats: '',
+      },
+      name: '',
+      purpose: '',
       invoice: '',
+      units: '',
       channel: {},
     };
+  },
+  created() {
+    this.units = this.$store.state.settings.units;
   },
   methods: {
     async openChannel() {
       const baseUrl = this.$store.state.settings.baseUrl;
       this.pending = true;
 
+      if (this.units === 'btc') {
+        this.amount.sats = this.amount.btc * 100000000;
+      }
+
       let data = {
-        amt: Math.floor(this.fundingAmount * 100000000), // convert from btc to sats
+        amt: this.amount.sats,
         name: this.name,
         purpose: this.purpose,
       };
@@ -86,37 +117,29 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.navbar {
+  background-color: #160c46;
+}
+
+.popup-main {
+  color: #fff !important;
+  background-color: #160c46;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.page-header {
+  font-size: 20px;
+  font-weight: bold;
+  color: #fff;
+  margin-top: 0.75rem;
+}
+
 .details {
   font-size: 18px;
   font-weight: 500;
   line-height: 1.5;
   color: #a29bbc;
-}
-
-.ext-link {
-  padding-top: 0.33em;
-  padding-bottom: 0.33em;
-  margin-top: 1rem;
-  border-radius: 24px;
-  color: #ffffff;
-  background-color: rgba(255, 255, 255, 0.1);
-  display: block;
-  margin: 1rem auto;
-}
-
-.wallet-options {
-  background-color: #0a0525;
-  padding: 1rem 1.5rem;
-}
-
-.wallet-options > a.ext-link > img {
-  max-height: 11px !important;
-  margin-left: 10px !important;
-  margin-top: -2px !important;
-}
-
-.wallet-options p {
-  text-align: center;
 }
 
 .data-group {
@@ -148,7 +171,7 @@ export default {
 
 .casa-button {
   padding: 1rem;
-  margin-left: -1px;
+  margin-top: 2rem;
   text-decoration: none !important;
   -webkit-appearance: none;
   display: inline-block;
@@ -166,5 +189,17 @@ export default {
 .btn-white {
   background: #fff;
   color: #000 !important;
+}
+
+.currency-group input {
+  border-radius: 4px !important;
+}
+
+#back-button {
+  cursor: pointer;
+}
+
+#forward-button {
+  visibility: hidden;
 }
 </style>

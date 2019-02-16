@@ -272,7 +272,10 @@ html {
   }
 }
 
-.small-text {
-  font-size: 16px;
+.footer > div > a:nth-child(1) {
+  margin-top: -6px;
+}
+.footer > div > a:nth-child(2) {
+  margin-top: -18px;
 }
 </style>
