@@ -29,3 +29,4 @@ Bundle a zip of the extension
 yarn build-zip
 
 ```
+
