@@ -29,5 +29,5 @@
     "persistent": true
   },
   "web_accessible_resources": ["*.js", "*.html"],
-  "permissions": ["storage", "activeTab", "clipboardWrite", "contextMenus"]
+  "permissions": ["http://casa-node.local/", "storage", "activeTab", "clipboardWrite", "contextMenus"]
 }
