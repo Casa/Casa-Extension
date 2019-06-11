@@ -28,12 +28,6 @@
     "scripts": ["background.js"],
     "persistent": true
   },
-  "browser_specific_settings": {
-    "gecko": {
-      "id": "addon@keys.casa",
-      "strict_min_version": "42.0"
-    }
-  },
   "web_accessible_resources": ["*.js", "*.html"],
-  "permissions": ["http://casa-node.local/", "http://localhost:3000/", "storage", "activeTab", "clipboardWrite", "contextMenus"]
+  "permissions": ["http://casa-node.local/", "storage", "activeTab", "clipboardWrite", "contextMenus"]
 }
