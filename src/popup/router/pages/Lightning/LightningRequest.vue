@@ -24,8 +24,8 @@
         </a>
       </section>
       <section class="wallet-options">
-        <p class="payment-info">{{ maxPaymentOut | units }}<units-badge /></p>
-        <p class="payment-details">MAX OUTGOING PAYMENT</p>
+        <p class="payment-info">{{ maxPaymentIn | units }}<units-badge /></p>
+        <p class="payment-details">MAX INCOMING PAYMENT</p>
       </section>
     </main>
   </div>
