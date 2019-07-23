@@ -141,6 +141,7 @@ html {
   overflow: auto;
   padding: 0.5rem 1rem 4rem 1rem;
   border-bottom: 3px solid #231a52;
+  scrollbar-width: none;
 
   .tx-list {
     margin-top: 0.5rem;

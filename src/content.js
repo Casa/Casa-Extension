@@ -1,7 +1,7 @@
 const browser = require('webextension-polyfill');
 
 async function sendMessage(data) {
-  await browser.runtime.sendMessage({ application: 'Casa Extension', response: true, data });
+  await browser.runtime.sendMessage({ application: 'Sats Extension by Casa', response: true, data });
 }
 
 // Add click event listener for lightning payment requests

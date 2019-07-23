@@ -3,14 +3,13 @@
     <div class="overlay_inner">
       <div class="overlay-message">
         <img id="home-logo" src="~assets/images/home-logo.svg" alt="home" />
-        <h2 class="text-center">Hello there.</h2>
-        <h4 class="text-center">Welcome to Casa Extension.</h4>
+        <h4 class="text-center">by Casa</h4>
         <img id="home-bg" src="~assets/images/home-bg.png" alt="background" style="display:none;" />
       </div>
       <div class="overlay-background"></div>
 
       <div class="buttons">
-        <a class="btn btn-block default-button" name="button" href="https://store.casa/lightning-node/" target="_blank" rel="noopener">Get a Casa Node for $299</a>
+        <a class="btn btn-block default-button" name="button" href="https://keys.casa/lightning-bitcoin-node/#node-now" target="_blank" rel="noopener">Get a Casa Node for $299</a>
         <a class="btn btn-block casa-button" name="button" @click.prevent="enter">Connect Your Casa Node</a>
       </div>
     </div>
@@ -78,7 +77,7 @@ export default {
 
   h4 {
     font-size: 22px;
-    margin-bottom: 0.75rem;
+    margin-bottom: 3em;
     color: #a29bbc;
   }
 }
@@ -120,8 +119,9 @@ export default {
 }
 
 #home-logo {
-  width: 120px;
+  width: 250px;
   height: auto;
-  margin-bottom: 1.25rem;
+  margin-bottom: 1em;
+  margin-top: 2.5em;
 }
 </style>

@@ -101,17 +101,17 @@ export default {
       }
     },
 
-    convertUSD: function(e, rate) {
+    convertUSD(e, rate) {
       this.btcSelected = true;
       this.calculate(e, rate);
     },
 
-    convertBTC: function(e, rate) {
+    convertBTC(e, rate) {
       this.btcSelected = false;
       this.calculate(e, rate);
     },
 
-    calculate: function(e, value) {
+    calculate(e, value) {
       var value = parseFloat(e.target.value);
       if (isNaN(value)) {
         this.btc = '';

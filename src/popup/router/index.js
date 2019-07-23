@@ -5,14 +5,13 @@ import store from '../../store';
 
 Vue.use(VueRouter);
 
-let router = new VueRouter({ routes });
+const router = new VueRouter({ routes });
 
 // Check secured routes
 router.beforeEach((to, from, next) => {
   if (to.meta.requiresAuth === true) {
     if (store.getters.isLoggedIn) {
       next();
-      return;
     } else {
       next('/login');
     }

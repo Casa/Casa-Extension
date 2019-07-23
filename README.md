@@ -1,4 +1,4 @@
-# Casa Extension
+# Sats Extension by Casa
 
 A secure, easy way to connect your browser to your Casa Node.
 

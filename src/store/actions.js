@@ -11,38 +11,40 @@ export const login = async ({ commit, state }, payload) => {
     axios.defaults.headers.common['Authorization'] = `JWT ${token}`;
     commit(types.SET_AUTH_SUCCESS, token);
   } catch (e) {
-    commit(types.SET_AUTH_ERROR, token);
+    commit(types.SET_AUTH_ERROR);
     localStorage.removeItem('token');
   }
 };
 
-export const logout = async ({ commit, state }, payload) => {
+export const logout = async ({ commit }) => {
   commit(types.SET_LOGOUT);
   localStorage.removeItem('token');
   delete axios.defaults.headers.common['Authorization'];
   router.push('/login');
 };
 
-export const setBaseUrl = async ({ commit, state }, payload) => {
+export const setBaseUrl = async ({ commit }, payload) => {
   commit(types.SET_BASE_URL, payload);
 };
 
-export const setUnits = async ({ commit, state }, payload) => {
+export const setUnits = async ({ commit }, payload) => {
   commit(types.SET_UNITS, payload);
 };
 
-export const setIntroFlag = async ({ commit, state }) => {
+export const setIntroFlag = async ({ commit }) => {
   commit(types.SET_INTRO_FLAG, true);
 };
 
-export const setInvoice = async ({ commit, state }, payload) => {
-  commit(types.SET_INVOICE, payload);
+export const setInvoice = async ({ commit }, payload) => {
+  // eliminate copy/pasted white space
+  const invoice = payload.trim();
+  commit(types.SET_INVOICE, invoice);
 };
 
-export const setPaymentRequest = async ({ commit, state }, payload) => {
+export const setPaymentRequest = async ({ commit }, payload) => {
   commit(types.SET_PAYMENT_REQUEST, payload);
 };
 
-export const setSendCoinsRequest = async ({ commit, state }, payload) => {
+export const setSendCoinsRequest = async ({ commit }, payload) => {
   commit(types.SET_SEND_COINS_REQUEST, payload);
 };

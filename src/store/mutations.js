@@ -19,17 +19,17 @@ export default {
   [types.SET_SEND_COINS_REQUEST](state, payload) {
     state.newTransaction = payload;
   },
-  [types.SET_AUTH_LOADING](state, payload) {
+  [types.SET_AUTH_LOADING](state) {
     state.status = 'loading';
   },
   [types.SET_AUTH_SUCCESS](state, payload) {
     state.settings.status = 'success';
     state.settings.token = payload;
   },
-  [types.SET_AUTH_ERROR](state, payload) {
+  [types.SET_AUTH_ERROR](state) {
     state.settings.status = 'error';
   },
-  [types.SET_LOGOUT](state, payload) {
+  [types.SET_LOGOUT](state) {
     state.settings.status = '';
     state.settings.token = '';
   },
