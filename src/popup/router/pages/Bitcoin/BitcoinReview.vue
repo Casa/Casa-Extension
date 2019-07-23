@@ -25,6 +25,8 @@
 </template>
 
 <script>
+import { satsToBtc } from '../../../helpers/units';
+
 export default {
   name: `BitcoinReview`,
   data() {
@@ -70,9 +72,12 @@ export default {
       }
     },
     satsToUsd() {
-      let usd = ((parseInt(this.transaction.amt) / 100000000) * this.rate).toFixed(2);
+      let usd = (satsToBtc(this.transaction.amt) * this.rate).toFixed(2);
       if (isNaN(usd)) {
         return 0;
+      }
+      if (usd.match(/\./)) {
+        usd = usd.replace(/\.?0+$/, ''); // trim trailing zeros
       }
       return '$' + usd;
     },

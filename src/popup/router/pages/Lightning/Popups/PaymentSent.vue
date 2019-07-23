@@ -17,17 +17,19 @@ export default {
   data() {
     return {
       amount: '',
-      invoice: '',
+      units: '',
     };
   },
   async created() {
+    const invoice = localStorage.getItem('invoice');
     const baseUrl = this.$store.state.settings.baseUrl;
-    this.invoice = localStorage.getItem('invoice');
+    this.units = this.$store.state.settings.units || 'sats';
 
     try {
-      const paymentInfo = (await this.$http.get(`${baseUrl}:3002/v1/lnd/lightning/invoice?paymentRequest=${this.invoice}`)).data;
+      const paymentInfo = (await this.$http.get(`${baseUrl}:3002/v1/lnd/lightning/invoice?paymentRequest=${invoice}`)).data;
       this.amount = paymentInfo.numSatoshis;
     } catch (err) {
+      console.log('err', err);
       this.$notify({ group: 'alerts', type: 'error', title: 'Error', text: `${err.response.data}`, position: 'top center' });
     }
   },

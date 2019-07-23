@@ -10,12 +10,12 @@
         <b-form-group class="font-weight-bold" label="Recipient BTC Address"> <b-form-input v-model="address"></b-form-input> </b-form-group>
         <b-form-group class="font-weight-bold currency-group" label="Amount">
           <div v-if="units === 'btc'">
-            <div class="btc"><b-form-input class="btc" v-model="amount.btc" placeholder="BTC" required></b-form-input></div>
-            <div class="usd"><b-form-input class="usd" :value="btcToUsd()" placeholder="USD"></b-form-input></div>
+            <div class="btc"><b-form-input class="btc" @keyup.native="convertUSD" :value="btc" required></b-form-input></div>
+            <div class="usd"><b-form-input class="usd" @keyup.native="convertBTC" :value="usd"></b-form-input></div>
           </div>
           <div v-else>
-            <div class="sats"><b-form-input class="sats" v-model="amount.sats" placeholder="SATS" required></b-form-input></div>
-            <div class="usd"><b-form-input class="usd" :value="satsToUsd()" placeholder="USD"></b-form-input></div>
+            <div class="sats"><b-form-input class="sats" @keyup.native="convertUSD" :value="btc" required></b-form-input></div>
+            <div class="usd"><b-form-input class="usd" @keyup.native="convertBTC" :value="usd"></b-form-input></div>
           </div>
         </b-form-group>
         <a @click="sendPayment" class="btn casa-button btn-block" name="button">Review Withdrawal</a>
@@ -41,17 +41,16 @@ export default {
   components: {
     ContentLoader,
   },
-
   data() {
     return {
       address: '',
       btcBalance: '',
       chBalance: '',
-      amount: {
-        sats: 0,
-        btc: 0,
-        usd: 0,
-      },
+      btc: 0.0,
+      sats: 0,
+      usd: 0.0,
+      exchangeRate: 0.0,
+      btcSelected: true,
       units: '',
       loading: true,
     };
@@ -72,7 +71,7 @@ export default {
 
     try {
       const { USD } = (await this.$http.get('https://min-api.cryptocompare.com/data/price?fsym=BTC&tsyms=USD')).data;
-      this.amount.usd = USD;
+      this.exchangeRate = USD;
     } catch (err) {
       this.$notify({ group: 'alerts', type: 'error', title: 'Error', text: `Error getting conversion rate`, position: 'top center' });
     }
@@ -80,26 +79,54 @@ export default {
 
   methods: {
     async sendPayment() {
-      const payload = { addr: this.address, amt: this.amount.sats };
+      const payload = { addr: this.address };
+
+      // format btc to sats
       if (this.units === 'btc') {
-        payload.amt = this.amount.btc * 100000000;
+        payload.amt = parseInt(this.btc * 100000000);
+      } else {
+        payload.amt = parseInt(this.btc);
       }
+
       this.$store.dispatch('setSendCoinsRequest', payload);
       this.$router.push('/bitcoin/send/review');
     },
-    btcToUsd() {
-      let usd = (this.amount.btc * this.amount.usd).toFixed(2);
-      if (isNaN(usd)) {
-        return 0;
-      }
-      return usd;
+
+    convertUSD(e, rate) {
+      this.btcSelected = true;
+      this.calculate(e, rate);
     },
-    satsToUsd() {
-      let usd = ((parseInt(this.amount.sats) / 100000000) * this.amount.usd).toFixed(2);
-      if (isNaN(usd)) {
-        return 0;
+
+    convertBTC(e, rate) {
+      this.btcSelected = false;
+      this.calculate(e, rate);
+    },
+
+    calculate(e, value) {
+      var value = parseFloat(e.target.value);
+      if (isNaN(value)) {
+        this.btc = '';
+        this.usd = '';
+        return;
       }
-      return usd;
+
+      if (this.btcSelected) {
+        this.btc = value;
+
+        if (this.units === 'btc') {
+          this.usd = (value * this.exchangeRate).toFixed(2);
+        } else {
+          this.usd = ((value / 100000000) * this.exchangeRate).toFixed(5);
+        }
+      } else {
+        this.usd = value;
+
+        if (this.units === 'btc') {
+          this.btc = (value / this.exchangeRate).toFixed(5);
+        } else {
+          this.btc = Math.floor((value / this.exchangeRate) * 100000000);
+        }
+      }
     },
   },
 };

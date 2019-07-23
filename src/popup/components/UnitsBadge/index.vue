@@ -11,7 +11,7 @@ export default {
     };
   },
   created() {
-    this.units = this.$store.state.settings.units;
+    this.units = this.$store.state.settings.units || 'sats';
   },
 };
 </script>

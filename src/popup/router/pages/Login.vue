@@ -11,6 +11,7 @@
           <span v-if="!pending">Sign In</span> <span v-if="pending" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
           <span v-if="pending">Connecting</span>
         </b-button>
+        <b-button class="btn casa-button" @click="changeNodeUrl()">Edit Node URL</b-button>
       </b-form>
     </section>
   </div>
@@ -42,6 +43,9 @@ export default {
       } finally {
         this.pending = false;
       }
+    },
+    changeNodeUrl() {
+      this.$router.push('/setup');
     },
   },
 };
@@ -83,7 +87,8 @@ export default {
     border: none;
     width: 100%;
     position: relative;
-    top: 240px;
+    top: 170px;
+    margin-bottom: 1rem;
   }
 }
 </style>

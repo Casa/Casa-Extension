@@ -11,12 +11,25 @@
         <p class="pay-to">{{ this.destination | truncate }}...</p>
         <p>{{ this.description }}</p>
         <hr />
-        <p class="pay-amount">{{ this.amount | units }} <units-badge /></p>
-        <p class="pay-fiat">{{ fiatValue }}</p>
-        <a class="btn casa-button btn-block" @click="confirmPayment" name="button" :disabled="pending === true">
+        <b-form-group v-if="customInvoice" class="font-weight-bold currency-group" label="Custom Invoice Amount">
+          <div v-if="units === 'btc'">
+            <div class="btc"><b-form-input id="currencyInput" @keyup.native="convertUSD" :value="btc"></b-form-input></div>
+            <div class="usd"><b-form-input @keyup.native="convertBTC" :value="usd" placeholder="USD"></b-form-input></div>
+          </div>
+          <div v-else>
+            <div class="sats"><b-form-input id="currencyInput" @keyup.native="convertUSD" :value="btc"></b-form-input></div>
+            <div class="usd"><b-form-input @keyup.native="convertBTC" :value="usd"></b-form-input></div>
+          </div>
+        </b-form-group>
+        <div v-else>
+          <p class="pay-amount">{{ this.amount | units }} <units-badge /></p>
+          <p class="pay-fiat">{{ fiatValue }}</p>
+        </div>
+        <!-- Disable if amount is 0 or payment is pending -->
+        <button class="btn casa-button btn-block" @click="confirmPayment" name="button" :disabled="pending === true || (customInvoice && btc === 0)">
           <span v-if="!pending">Confirm Send</span> <span v-if="pending" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
           <span v-if="pending">Sending</span>
-        </a>
+        </button>
       </section>
       <section class="wallet-options">
         <p class="payment-info">{{ (this.chBalance - this.amount) | units }} <units-badge /></p>
@@ -28,6 +41,7 @@
 
 <script>
 import axios from 'axios';
+import { satsToBtc, btcToSats } from '../../../../helpers/units';
 
 export default {
   name: `PopupLightningReview`,
@@ -42,11 +56,31 @@ export default {
       chBalance: '',
       pending: false,
       invoice: '',
+      btc: 0.0,
+      usd: 0.0,
+      exchangeRate: 0.0,
+      btcSelected: true,
+      customInvoice: false,
     };
   },
   async created() {
     this.units = this.$store.state.settings.units;
     const baseUrl = this.$store.state.settings.baseUrl;
+    this.invoice = localStorage.getItem('invoice');
+
+    try {
+      const paymentInfo = (await this.$http.get(`${baseUrl}:3002/v1/lnd/lightning/invoice?paymentRequest=${this.invoice}`)).data;
+      this.expiry = paymentInfo.expiry;
+      this.destination = paymentInfo.destination;
+      this.description = paymentInfo.description;
+      this.amount = paymentInfo.numSatoshis;
+      if (this.amount === '0') {
+        this.customInvoice = true;
+      }
+    } catch (err) {
+      this.$notify({ group: 'alerts', type: 'error', title: 'Error', text: `${err.response.data}`, position: 'top center' });
+    }
+
     try {
       const { balance } = (await this.$http.get(`${baseUrl}:3002/v1/pages/lnd`)).data;
       this.chBalance = balance.channel.balance;
@@ -54,20 +88,14 @@ export default {
       this.$notify({ group: 'alerts', type: 'error', title: 'Error', text: `${err.response.data}`, position: 'top center' });
     }
 
-    this.invoice = localStorage.getItem('invoice');
-    try {
-      const paymentInfo = (await this.$http.get(`${baseUrl}:3002/v1/lnd/lightning/invoice?paymentRequest=${this.invoice}`)).data;
-      this.expiry = paymentInfo.expiry;
-      this.amount = paymentInfo.numSatoshis;
-      this.destination = paymentInfo.destination;
-      this.description = paymentInfo.description;
-    } catch (err) {
-      this.$notify({ group: 'alerts', type: 'error', title: 'Error', text: `${err.response.data}`, position: 'top center' });
-    }
-
     try {
       const { USD } = (await this.$http.get('https://min-api.cryptocompare.com/data/price?fsym=BTC&tsyms=USD')).data;
-      this.fiatValue = '$' + ((this.amount / 100000000) * USD).toFixed(2);
+      let fiatVal = (satsToBtc(this.amount) * USD).toFixed(4);
+      if (fiatVal.match(/\./)) {
+        fiatVal = fiatVal.replace(/\.?0+$/, ''); // trim trailing zeros
+      }
+      this.fiatValue = `$${fiatVal}`;
+      this.exchangeRate = USD;
     } catch (err) {
       this.$notify({ group: 'alerts', type: 'error', title: 'Error', text: `Error getting conversion rate`, position: 'top center' });
     }
@@ -75,14 +103,61 @@ export default {
   methods: {
     async confirmPayment() {
       const baseUrl = this.$store.state.settings.baseUrl;
+      const payload = { paymentRequest: this.invoice };
       this.pending = true;
+
+      // ensure value set for zero sat invoices
+      if (this.amount === '0') {
+        // convert to sats
+        if (this.units === 'btc') {
+          payload.amt = btcToSats(this.btc);
+        } else {
+          payload.amt = this.btc;
+        }
+      }
+
       try {
-        await this.$http.post(`${baseUrl}:3002/v1/lnd/lightning/payInvoice`, { paymentRequest: this.invoice });
+        await this.$http.post(`${baseUrl}:3002/v1/lnd/lightning/payInvoice`, payload);
         this.$router.push({ path: '/popup/pay/success' });
       } catch (err) {
         this.$notify({ group: 'alerts', type: 'error', title: 'Error', text: `${err.response.data}`, position: 'top center' });
       } finally {
         this.pending = false;
+      }
+    },
+
+    convertUSD(e, rate) {
+      this.btcSelected = true;
+      this.calculate(e, rate);
+    },
+
+    convertBTC(e, rate) {
+      this.btcSelected = false;
+      this.calculate(e, rate);
+    },
+
+    calculate(e, value) {
+      var value = parseFloat(e.target.value);
+      if (isNaN(value)) {
+        this.btc = '';
+        this.usd = '';
+        return;
+      }
+
+      if (this.btcSelected) {
+        this.btc = value;
+        if (this.units === 'btc') {
+          this.usd = (value * this.exchangeRate).toFixed(2);
+        } else {
+          this.usd = (satsToBtc(value) * this.exchangeRate).toFixed(5);
+        }
+      } else {
+        this.usd = value;
+        if (this.units === 'btc') {
+          this.btc = (value / this.exchangeRate).toFixed(5);
+        } else {
+          this.btc = btcToSats(value / this.exchangeRate);
+        }
       }
     },
   },

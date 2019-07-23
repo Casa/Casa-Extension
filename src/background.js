@@ -40,7 +40,7 @@ function payInvoice(request) {
 
 // Add message listener
 browser.runtime.onMessage.addListener(async request => {
-  if (!request || !request.data || request.application !== 'Casa Extension') {
+  if (!request || !request.data || request.application !== 'Sats Extension by Casa') {
     return;
   }
   // open extension in popup window

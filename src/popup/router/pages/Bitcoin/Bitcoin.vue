@@ -35,7 +35,7 @@
                   <h2>
                     <span>{{ tx.amount | units }}</span> <span v-if="units === 'btc'">BTC</span><span v-else>sats</span>
                   </h2>
-                  <h3>${{ ((parseInt(tx.amount) / 100000000) * rate).toFixed(2) }}</h3>
+                  <h3>${{ (satsToBtc(tx.amount) * rate).toFixed(2) }}</h3>
                 </div>
               </div>
             </a>
@@ -90,6 +90,7 @@
 
 <script>
 import { ContentLoader } from 'vue-content-loader';
+import { satsToBtc } from '../../../helpers/units';
 
 export default {
   name: `Bitcoin`,

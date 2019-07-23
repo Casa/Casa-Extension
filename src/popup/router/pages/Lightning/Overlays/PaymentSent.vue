@@ -4,7 +4,7 @@
       <div class="overlay-message">
         <img src="~assets/images/check-success.svg" alt="success" />
         <h4 class="text-center">Lightning Payment Sent</h4>
-        <h2 class="text-center">{{ this.amount | units }} <span class="heartbeat">BTC</span></h2>
+        <h2 class="text-center">{{ this.amount | units }} <units-badge /></h2>
       </div>
       <div class="overlay-buttons">
         <a class="btn casa-button btn-outline btn-block" name="button" @click.prevent="$router.push('/lightning/channels/new')">Open Channel</a>
@@ -20,9 +20,11 @@ export default {
   data() {
     return {
       amount: '',
+      units: '',
     };
   },
   async created() {
+    this.units = this.$store.state.settings.units;
     const baseUrl = this.$store.state.settings.baseUrl;
     const invoice = this.$store.state.invoice;
 
