@@ -19,7 +19,7 @@
     "@babel/polyfill": "^7.2.5",
     "axios": "^0.18.0",
     "bignumber.js": "^8.0.2",
-    "bootstrap-vue": "^2.0.0-rc.11",
+    "bootstrap-vue": "^2.0.0-rc.12",
     "core-js": "^2.6.1",
     "dayjs": "^1.7.8",
     "v-tooltip": "^2.0.0-rc.33",
